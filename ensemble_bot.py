@@ -19,6 +19,8 @@ Configuration (GitHub repository *variables* or secrets; all optional):
   EXTREMIZE             logit multiplier for binary aggregate (default 1.0 = off)
   DRY_RUN               "1" = don't publish to Metaculus
   TOURNAMENT_ID         override the seasonal tournament (id or slug, e.g. fall-futureeval-2026)
+  MAIN_TOURNAMENTS      "off" = skip the seasonal tournament and MiniBench in tournament mode and forecast only the
+                        SPOT_TOURNAMENTS (e.g. Market Pulse on a small paid key between credit seasons). Default on.
   SPOT_TOURNAMENTS      comma list of spot-scored tournaments to also forecast in tournament mode
                         (default: market-pulse-26q4; "none" to disable). Only the forecast standing at close
                         counts there, so questions are forecast once when first seen and re-forecast in the last
@@ -338,9 +340,13 @@ if __name__ == "__main__":
         if str(tid) == "33022":
             logger.warning("library points at the closed Summer-2026 tournament; using fall-futureeval-2026")
             tid = "fall-futureeval-2026"
-        logger.info(f"tournament: {tid}")
-        reports = asyncio.run(bot.forecast_on_tournament(tid, return_exceptions=True))
-        reports += asyncio.run(bot.forecast_on_tournament(client.CURRENT_MINIBENCH_ID, return_exceptions=True))
+        reports = []
+        if (os.getenv("MAIN_TOURNAMENTS") or "on").strip().lower() in {"off", "0", "false", "no"}:
+            logger.info("MAIN_TOURNAMENTS=off: skipping the seasonal tournament and MiniBench (spot tournaments only)")
+        else:
+            logger.info(f"tournament: {tid}")
+            reports += asyncio.run(bot.forecast_on_tournament(tid, return_exceptions=True))
+            reports += asyncio.run(bot.forecast_on_tournament(client.CURRENT_MINIBENCH_ID, return_exceptions=True))
         for spot_tid in spot_tournaments():
             try:
                 qs = client.get_all_open_questions_from_tournament(spot_tid)
