@@ -47,3 +47,5 @@ jobs:
           EXTREMIZE: ${{ vars.EXTREMIZE }}
           DRY_RUN: ${{ vars.DRY_RUN }}
           TOURNAMENT_ID: ${{ vars.TOURNAMENT_ID }}
+          MAIN_TOURNAMENTS: ${{ vars.MAIN_TOURNAMENTS }}
+          SPOT_TOURNAMENTS: ${{ vars.SPOT_TOURNAMENTS }}
